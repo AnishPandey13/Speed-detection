@@ -16,7 +16,7 @@ with open("coco.names", "r") as f:
 
 tracker = Tracker()
 count = 0
-cap = cv2.VideoCapture("v.mp4")
+cap = cv2.VideoCapture("vv.mp4")
 
 # Get the video frame rate for accurate timing
 fps = cap.get(cv2.CAP_PROP_FPS)
@@ -26,9 +26,10 @@ up = {}
 counter_down = []
 counter_up = []
 
-red_line_y = 198
-blue_line_y = 268
-offset = 6
+red_line_y = 310
+blue_line_y = 450
+offset = 160
+
 
 # Create a folder to save frames
 if not os.path.exists("detected_frames"):
@@ -84,23 +85,36 @@ while True:
 
     # Update tracker
     bbox_id = tracker.update(detections)
+    print("bbox = ",bbox_id)
 
     for bbox in bbox_id:
+        print("running loop")
         x3, y3, x4, y4, id = bbox
         cx = int((x3 + x4) / 2)
         cy = int((y3 + y4) / 2)
 
         # Calculate speed when moving down
         if red_line_y < (cy + offset) and red_line_y > (cy - offset):
-            down[id] = count / fps  # Time in seconds based on frame count
+            down[id] = count / fps  
+            print(f"getting down id{down}")
         if id in down:
+            print("id id")
+            print("BLUE LINE = ",blue_line_y)
+            print("CY and OFFSET = ",cy,offset)
             if blue_line_y < (cy + offset) and blue_line_y > (cy - offset):
-                elapsed_time = (count / fps) - down[id]
+                print("down id = ",down[id])
+                print(count,fps)
+                elapsed_time = float(float(count) / fps) + float(down[id])
+                # elapsed_time = 10
+                
+                print("EST = ",float(elapsed_time))
                 if counter_down.count(id) == 0:
+                    print("counter id")
                     counter_down.append(id)
-                    distance = 10  # meters
+                    distance = float(10.0)  # meters
                     a_speed_ms = distance / elapsed_time
                     a_speed_kh = a_speed_ms * 3.6
+                    print("SPEED = ",a_speed_kh)
                     cv2.circle(frame, (cx, cy), 4, (0, 0, 255), -1)
                     cv2.rectangle(frame, (x3, y3), (x4, y4), (0, 255, 0), 2)
                     cv2.putText(frame, str(id), (x3, y3), cv2.FONT_HERSHEY_COMPLEX, 0.6, (255, 255, 255), 1)
@@ -111,7 +125,8 @@ while True:
             up[id] = count / fps  # Time in seconds based on frame count
         if id in up:
             if red_line_y < (cy + offset) and red_line_y > (cy - offset):
-                elapsed1_time = (count / fps) - up[id]
+                # elapsed1_time = (count / fps) - up[id]
+                elapsed1_time = 10
                 if counter_up.count(id) == 0:
                     counter_up.append(id)
                     distance1 = 10  # meters
